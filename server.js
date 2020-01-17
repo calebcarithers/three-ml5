@@ -5,11 +5,11 @@ const app = express();
 
 const port = process.env.PORT || 5000;
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, './index.html'));
+app.get('/noseDraw', (req, res) => {
+    res.sendFile(path.join(__dirname, './noseDraw.html'));
 })
-app.get('/ml5', (req, res) => {
-    res.sendFile(path.join(__dirname, './ml5.html'));
+app.get('/p5ML5', (req, res) => {
+    res.sendFile(path.join(__dirname, './p5ML5.html'));
 })
 
 app.use('/modules', express.static(__dirname + '/node_modules'));

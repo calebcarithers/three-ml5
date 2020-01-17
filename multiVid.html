@@ -179,7 +179,7 @@
             const videoMat = new THREE.MeshBasicMaterial({ map: vidTexture, side: THREE.DoubleSide });
 
             // VIDEO BACKGROUND
-            const vidGeom = new THREE.PlaneGeometry(2, 1.5, 32);
+            const vidGeom = new THREE.PlaneGeometry(2.1, 1.6, 32);
             const vidMesh = new THREE.Mesh(vidGeom, videoMat);
             vidMesh.rotation.y = Math.PI;
             scene.add( vidMesh );
