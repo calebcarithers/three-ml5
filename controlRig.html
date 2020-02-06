@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/static/style.css">
+
+        <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script> -->
+        <!-- <script src="/modules/three/examples/js/libs/inflate.min.js"></script> -->
+        <!-- <script src="/modules/three/examples/js/loaders/FBXLoader.js"></script> -->
+        <!-- <script src="/modules/three/examples/js/loaders/GLTFLoader.js"></script> -->
+        <script src="/modules/ccapture.js/build/CCapture.all.min.js"></script>
+        <style>
+            body { margin:0; }
+            canvas { width: 100%; height: 100%; }
+        </style>
+    </head>
+    <body style="margin: 0;">
+        <div id="root">
+            <video autoplay='true' muted playsinline id='videoElement' width="640" height="480" style="position: absolute; z-index: -10;"></video>
+        </div>
+        <button id="stopbutton" style="position: absolute; bottom: 0;">stop canvas record</button>
+        <script type="module">
+
+            import * as THREE from '/modules/three/build/three.module.js';
+            import { FBXLoader } from '/modules/three/examples/jsm/loaders/FBXLoader.js';
+            import { GLTFLoader } from '/modules/three/examples/jsm/loaders/GLTFLoader.js';
+
+            // CAPTURER
+            var capturer = new CCapture({format: 'webm', framerate: 30, verbose: false, quality: 100});
+            capturer.start();
+
+            // STOP CAPTURE BUTTON
+            var stopButton = document.getElementById("stopbutton");
+            stopButton.addEventListener("click", function () {
+                capturer.stop();
+                capturer.save();
+            })
+
+            // POSENET AND VIDEO
+
+            // VIDEO VARS TEMPORARY (ADJUST TO BE RESPONSIVE)
+            var width = 640;
+            var height = 480;
+
+            // POSE NET VARS
+            let poseNet;
+            let noseX, noseY = 0;
+            let eyelX, eyelY = 0;
+            let eyerX, eyerY = 0;
+            let earlX, earlY = 0;
+            let earrX, earrY = 0;
+            let shoulderlX, shoulderlY = 0;
+            let elbowlX, elbowlY = 0;
+            let wristlX, wristlY = 0;
+            let wristrX, wristrY = 0;
+
+            // SCREEN TO WORLD SPACE COORDINATE
+            var threeDSpotL;
+            var threeDSpotR;
+            var threeDSpotC;
+
+            // SET VIDEO WEBCAM STREAM
+            var video = document.querySelector("#videoElement");
+
+            // GET VIDEO STREAM
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: {
+                        height: height,
+                        width: width,
+                    }
+            })
+                    .then((stream) => {
+                        console.log("streaming")
+                        video.srcObject = stream;
+                        // window.addEventListener('DOMContentLoaded', () => {
+                        //     poseNet = ml5.poseNet(video, modelReady);
+                        //     poseNet.on('pose', gotPoses);
+                        //     console.log("dom ready")
+                        // })
+                    })
+                    .catch((e) => {
+                        console.log(e)
+                    });
+            }   
+
+            // START POSENET STREAM HAS LOADED
+            // window.addEventListener('DOMContentLoaded', () => {
+            //                 poseNet = ml5.poseNet(video, modelReady);
+            //                 poseNet.on('pose', gotPoses);
+            //                 console.log("dom ready")
+            //             })
+
+            // NOT SURE IF BELOW OR ABOVE IS CORRECT
+            video.addEventListener("loadedmetadata", function(e) {
+                console.log(video.videoWidth);
+                console.log(video.videoHeight);
+                var vidWidth = video.videoWidth;
+                var vidHeight = video.videoHeight;
+                poseNet = ml5.poseNet(video, modelReady);
+                poseNet.on('pose', gotPoses);
+                console.log("posing")
+            })
+
+            function modelReady(){
+                console.log("pose net model ready")
+            }
+
+            // CALLBACK FOR POSENET
+            function gotPoses(poses) {
+                if (poses.length > 0) {
+                    noseX = poses[0].pose.keypoints[0].position.x;
+                    noseY = poses[0].pose.keypoints[0].position.y;
+
+                    // threeDSpot = give3DCoord(noseX, noseY);
+                    // console.log(threeDSpot);
+                    // console.log(noseY)
+
+                    // eyelX = poses[0].pose.keypoints[1].position.x;
+                    // eyelY = poses[0].pose.keypoints[1].position.y;
+                    // eyerX = poses[0].pose.keypoints[2].position.x;
+                    // eyerY = poses[0].pose.keypoints[2].position.y;
+                    // earlX = poses[0].pose.keypoints[3].position.x;
+                    // earlY = poses[0].pose.keypoints[3].position.y;
+                    // earrX = poses[0].pose.keypoints[4].position.x;
+                    // earrY = poses[0].pose.keypoints[4].position.y;
+
+                    // shoulderlX = poses[0].pose.keypoints[5].position.x;
+                    // shoulderlY = poses[0].pose.keypoints[5].position.y;
+                    // elbowlX = poses[0].pose.keypoints[7].position.x;
+                    // elbowlY = poses[0].pose.keypoints[7].position.y;
+                    wristlX = poses[0].pose.keypoints[9].position.x;
+                    wristlY = poses[0].pose.keypoints[9].position.y;
+                    wristrX = poses[0].pose.keypoints[10].position.x;
+                    wristrY = poses[0].pose.keypoints[10].position.y;
+                    // console.log(wristrX, wristrY)
+                    }
+            }
+
+
+            // THREEJS
+
+            // ELEMENT TO ATTACH CANVAS TO
+            var root = document.getElementById('root');
+
+            var scene = new THREE.Scene();
+            // scene.background = new THREE.Color(0xFFFF1F);
+
+            // THREE.PerspectiveCamera(FOV, aspect ratio, near frustrum, far frustrum (clipping planes) );
+            var camera = new THREE.PerspectiveCamera(75, width/height, 0.1, 1000);
+            
+            // PUSH CAMERA BACK
+            camera.position.z = 17;
+
+            // RENDERER
+            var renderer = new THREE.WebGLRenderer({alpha: true});
+            renderer.setClearAlpha(0.2);
+            renderer.setSize(width, height);
+            renderer.domElement.id = "threeCanvas";
+            renderer.setPixelRatio(1)
+            console.log("pixel ratio: " + renderer.getPixelRatio())
+            root.insertBefore(renderer.domElement, root.firstChild);
+
+            // VIDEO TEXTURE FROM WEBCAM
+            const vidTexture = new THREE.VideoTexture( video );
+            vidTexture.minFilter = THREE.LinearFilter;
+            vidTexture.magFilter = THREE.LinearFilter;
+            vidTexture.format = THREE.RGBFormat;
+            const videoMat = new THREE.MeshBasicMaterial({ map: vidTexture, side: THREE.DoubleSide });
+            const testVidMat = new THREE.MeshBasicMaterial({color: '#72e5be', side: THREE.DoubleSide});
+
+            // VIDEO BACKGROUND
+            const vidGeom = new THREE.PlaneGeometry(30, 30, 32);
+            const vidMesh = new THREE.Mesh(vidGeom, videoMat);
+            vidMesh.rotation.y = Math.PI;
+            vidMesh.position.z = -25;
+            // scene.add( vidMesh );
+
+            // RIGHT, LEFT WRIST & NOSE FOLLOWER
+            var geometry = new THREE.CircleGeometry(0.01, 32);
+            var materialWrist = new THREE.MeshBasicMaterial( {color: 0xf451b2} );
+            var materialNose = new THREE.MeshBasicMaterial( {color: 0xfff68f} )
+            var rightWristFollow = new THREE.Mesh(geometry, materialWrist);
+            var leftWristFollow = new THREE.Mesh(geometry, materialWrist);
+            var noseFollow = new THREE.Mesh(geometry, materialNose);
+            scene.add(rightWristFollow);
+            scene.add(leftWristFollow);
+            scene.add(noseFollow);
+
+            // FBX LOADER & VARS
+            var holder = []
+            var collarL;
+            var collarR;
+            
+            const loader = new FBXLoader();
+            loader.load("/static/models/human-final.fbx", function(model) {
+                // model is THREE.Object3D
+                let example = new THREE.Object3D();
+                example = model;
+                example.position.y = -8.5;
+                example.position.z = 1;
+                // example.scale = new THREE.Vector3(0.1,0.1,0.1)
+                console.log("FBX model added")
+                console.log(example);
+                holder.push(example);
+
+                var textLoader = new THREE.CubeTextureLoader();
+                // var reflection = THREE.ImageUtils.loadTextureCube(['/static/textures/diamond.jpg','/static/textures/diamond.jpg','/static/textures/diamond.jpg','/static/textures/diamond.jpg','/static/textures/diamond.jpg','/static/textures/diamond.jpg'])
+                textLoader.setPath('/static/textures/');
+                var textureCube = textLoader.load([
+                    'diamond.jpg','diamond.jpg',
+                    'diamond.jpg','diamond.jpg',
+                    'diamond.jpg','diamond.jpg'
+                ]);
+
+                example.traverse(function(child) {
+                    if (child.name == "root") {
+                        child.material.envMap = textureCube;
+                        console.log(child.material)
+                    }
+                })
+
+                example.traverse(function(child) {
+                    if (child.name == "CollarR") {
+                        collarR = child;
+                    } else if (child.name == "CollarL") {
+                        collarL = child;
+                    } 
+                })
+                directionalLightUnder.target = holder[0];
+                directionalLightFront.target = holder[0];
+                scene.add(example);
+            }, undefined, function(e) {
+                console.log("error here!")
+                console.log(e)
+            })
+
+            // AMBIENT LIGHT
+            var ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            // DIRECTIONAL LIGHTS
+            var directionalLightUnder = new THREE.DirectionalLight(0xffffff, 5);
+            directionalLightUnder.position.y = -100
+            directionalLightUnder.position.z = -1
+            console.log(directionalLightUnder.position)
+            scene.add(directionalLightUnder);
+
+            var directionalLightFront = new THREE.DirectionalLight(0xffffff, 10);
+            directionalLightFront.position.y = 3
+            directionalLightFront.position.z = 5
+            console.log(directionalLightFront.position)
+            var helper = new THREE.DirectionalLightHelper(directionalLightFront, 5);
+            scene.add(helper);
+            scene.add(directionalLightFront);
+
+            // SHOW ME THOSE AXES BC YOU ALREADY KNOW IM FORGETTING
+            var axesHelper = new THREE.AxesHelper(5)
+            axesHelper.position.z = 5
+            scene.add(axesHelper);
+
+            // SCREEN SPACE TO WORLD SPACE
+            function give3DCoord(twodeeX, twodeeY) {
+                // var mouseL = new THREE.Vector3(0, 0, 0.5);
+                // var mouseR = new THREE.Vector3(0, 0, 0.5);
+                let mouse = new THREE.Vector3(0, 0, 0.5);
+                mouse.x = (twodeeX / width) * 2 - 1;
+                mouse.y = -(twodeeY / height) * 2 + 1;
+                mouse.z = 0.5;
+
+                mouse.unproject( camera );
+                return mouse
+            }
+
+            // GET ROTATION OF ARM
+            function getRotation(nosePos, armPos) {
+                // console.log(nosePos)
+                return Math.atan((armPos.x - nosePos.x)/(nosePos.y - armPos.y))
+            }
+
+            // DRAW IT ALL
+            function animate() {
+                requestAnimationFrame( animate );
+
+                // ROTATING RANDOM THINGS
+                for (let thing of holder) {
+                    // thing.children[0].children[0].children[0].children[0].children[0].rotation.z -= 0.005;
+                    // thing.children[0].children[1].rotation.y += 0.05;
+                    thing.rotation.y += 0.05; 
+                }
+
+                // CONSTANT ROTATING ARMS
+                // if (collarL && collarR) {
+                //     collarL.children[0].rotation.z -= 0.01;
+                //     collarR.children[0].rotation.z += 0.01;
+                // }
+
+               
+                // NOSE & HAND FOLLOWERS
+                threeDSpotR = give3DCoord(wristrX, wristrY);
+                threeDSpotL = give3DCoord(wristlX, wristlY);
+                threeDSpotC = give3DCoord(noseX, noseY);
+
+                rightWristFollow.position.x = -threeDSpotR.x
+                rightWristFollow.position.y = threeDSpotR.y
+                rightWristFollow.position.z = threeDSpotR.z
+
+                leftWristFollow.position.x = -threeDSpotL.x
+                leftWristFollow.position.y = threeDSpotL.y
+                leftWristFollow.position.z = threeDSpotL.z
+
+                noseFollow.position.x = -threeDSpotC.x
+                noseFollow.position.y = threeDSpotC.y
+                noseFollow.position.z = threeDSpotC.z
+                // GET ROTATION & SET
+                if (threeDSpotC && threeDSpotR) {
+                    let rightRot = Math.abs(getRotation(threeDSpotC, threeDSpotR)) - 1.5;
+                    let leftRot = Math.abs(getRotation(threeDSpotC, threeDSpotL)) - 1.5;
+                    // console.log(rightRot)
+                    if (collarR && collarL) {
+                        collarR.children[0].rotation.z = rightRot
+                        collarL.children[0].rotation.z = -leftRot
+                    }
+                }
+
+                threeDSpotR = give3DCoord(eyerX, eyerY);
+
+                renderer.render(scene, camera);
+                capturer.capture(renderer.domElement);
+            }
+            animate();
+        </script>
+    </body>
+</html>

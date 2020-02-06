@@ -1,0 +1,158 @@
+<style>
+
+    .productTable {
+        width: 900
+    }
+
+    .flip-container {
+        perspective: 1000px;
+    }
+    
+    .flip-container:hover .flipper, .flip-container.hover .flipper {
+        transform: rotateY(180deg);
+    }
+    
+    .flip-container, .front, .back, .productTable img {
+        width: 300px;
+        height: 300px;
+    }
+
+    @media only screen and (max-width: 600px) {
+    .flip-container, .front, .back, .productTable img {
+        width: 200px;
+        height: 200px;
+        /* background-color: orange */
+    }
+
+    .productTable {
+        width: 600px;
+    }
+  }
+    
+    .flipper {
+      -webkit-transition: 0.6s;
+        transition: 0.6s;
+      
+      -webkit-transform-style: preserve-3d;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    
+    .front, .back {
+      -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+      
+      position: absolute;
+      top:0;
+      left:0;
+    }
+    
+    .front {
+        z-index: 2;
+      transform: rotateY(0deg);
+    }
+    
+    .back {
+        transform: rotateY(180deg);
+    }
+  </style>
+  
+  <table class="productTable" align="center" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <!--      FIRST ROW        -->
+      <tr>
+        <td>
+          <a href="https://silca.cc/collections/packs-on-bike-1">
+            <div class="flip-container">
+              <div class="flipper">
+                <div class="front">
+                  <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/maratona-flip.jpg?v=1579287726" alt="">
+                </div>
+                <div class="back">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/maratona-flip2.jpg?v=1579287725" alt="">
+                </div>
+            </div>
+            </div>
+          </a>
+        </td>
+            
+        <td>
+          <a href="https://info.silca.cc/silca-professional-pressure-calculator">
+            <div class="flip-container">
+              <div class="flipper">
+                <div class="front">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/question_tirepressure_copy.jpg?v=1579287726" alt="">
+                </div>
+                <div class="back">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/answer_tirepressure_copy.jpg?v=1579287726" alt="">
+                </div>
+            </div>
+            </div>
+          </a>
+        </td>
+            
+        <td>
+          <a href="https://silca.cc/collections/replacement-parts">
+            <div class="flip-container">
+              <div class="flipper">
+                <div class="front">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/pumphistory.jpg?v=1579287726" alt="">
+                </div>
+                <div class="back">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/pumphistory2.jpg?v=1579287726" alt="">
+                </div>
+            </div>
+            </div>
+          </a>
+        </td>
+      </tr>
+      
+      <tr>
+        <!--      SECOND ROW     -->
+        <td>
+          <a href="https://silca.cc/collections/bottle-cages">
+            <div class="flip-container">
+              <div class="flipper">
+                <div class="front">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/question_titanium_copy.jpg?v=1579287725" alt="">
+                </div>
+                <div class="back">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/answer_titanium_copy.jpg?v=1579287726" alt="">
+                </div>
+            </div>
+            </div>
+          </a>
+        </td>
+        
+        <td>
+          <a href="https://marginalgainspodcast.cc/the-placebo-effect-and-marginal-gains/">
+            <div class="flip-container">
+              <div class="flipper">
+                <div class="front">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/marginalgains_flipcard.jpg?v=1579287726" alt="">
+                </div>
+                <div class="back">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/marginalgains_flipcard2.jpg?v=1579287726" alt="">
+                </div>
+            </div>
+            </div>
+          </a>
+        </td>
+        
+        <td>
+          <a href="https://silca.cc/pages/nastro-bar-tape-lp">
+            <div class="flip-container">
+              <div class="flipper">
+                <div class="front">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/question_bartape_copy.jpg?v=1579287725" alt="">
+                </div>
+                <div class="back">
+                    <img src="https://cdn.shopify.com/s/files/1/0309/9521/files/answer_bartape_copy.jpg?v=1579288240" alt="">
+                </div>
+            </div>
+            </div>
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>

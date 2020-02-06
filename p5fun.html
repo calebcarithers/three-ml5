@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/static/style.css">
+
+        <!-- <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script> -->
+
+        <!-- <script src="/modules/ccapture.js/build/CCapture.all.min.js"></script> -->
+        <script src="/modules/p5/lib/p5.js"></script>
+        <style>
+            body { margin:0; }
+            canvas { width: 100%; height: 100%; }
+        </style>
+    </head>
+    <body style="margin: 0;">
+        <div id="root">
+            <video autoplay='true' muted playsinline id='videoElement' width="640" height="480" style="position: absolute; z-index: -10;"></video>
+        </div>
+        <!-- <button id="stopbutton" style="position: absolute; bottom: 0;">stop canvas record</button> -->
+        <!-- <button id="stopvideorecord" style="position: absolute; bottom: 0; left: 100px;"></button> -->
+        <script>
+            function setup() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                console.log(pixelDensity())
+                // pixelDensity(0.5);
+                createCanvas(width,height);
+                pixelDensity(2.0)
+                background("#FF3400");
+                // background('#E86F07');
+                console.log(window.innerWidth)
+            }
+
+            function draw() {
+                // noStroke();
+                fill('#FF840D') // yellow orange
+                // fill('#FF0D59')
+                fill('#FFA015');
+                if (mouseIsPressed){
+                    circle(mouseX, mouseY, 20)
+                    // square(mouseX, mouseY, 10, 2)
+                }
+
+            }
+
+            function keyPressed() {
+                console.log(keyCode)
+                if (keyCode == 83) {
+                    saveCanvas('myCanv', 'jpg');
+                }
+            }
+        </script>
+    </body>
+</html>
