@@ -27,11 +27,18 @@
             <video autoplay='true' muted playsinline id='videoElement' width="640" height="480" style="position: absolute; z-index: -10;"></video>
         </div>
         <button id="stopbutton" style="position: absolute; bottom: 0;">stop canvas record</button>
+        <div id="rotationText" style="font-size: 100px;">
+            debug here
+        </div>
         <script type="module">
 
             import * as THREE from '/modules/three/build/three.module.js';
             import { FBXLoader } from '/modules/three/examples/jsm/loaders/FBXLoader.js';
             import { GLTFLoader } from '/modules/three/examples/jsm/loaders/GLTFLoader.js';
+
+            Number.prototype.map = function (in_min, in_max, out_min, out_max) {
+                return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+            }
 
             // CAPTURER
             var capturer = new CCapture({format: 'webm', framerate: 30, verbose: false, quality: 100});
@@ -53,22 +60,26 @@
             // POSE NET VARS
             let poseNet;
             let noseX, noseY = 0;
-            let eyelX, eyelY = 0;
-            let eyerX, eyerY = 0;
-            let earlX, earlY = 0;
-            let earrX, earrY = 0;
             let shoulderlX, shoulderlY = 0;
+            let shoulderrX, shoulderrY = 0;
             let elbowlX, elbowlY = 0;
+            let elbowrX, elbowrY = 0;
             let wristlX, wristlY = 0;
             let wristrX, wristrY = 0;
 
             // SCREEN TO WORLD SPACE COORDINATE
-            var threeDSpotL;
-            var threeDSpotR;
-            var threeDSpotC;
+            // var threeDSpotC;
+            var shoulderR3DSpot
+            var shoulderL3DSpot;
+            var elbowR3DSpot;
+            var elbowL3DSpot;
+            var wristL3DSpot;
+            var wristR3DSpot;
 
             // SET VIDEO WEBCAM STREAM
             var video = document.querySelector("#videoElement");
+            
+            var debugText = document.querySelector('#rotationText');
 
             // GET VIDEO STREAM
             if (navigator.mediaDevices.getUserMedia) {
@@ -118,8 +129,8 @@
             // CALLBACK FOR POSENET
             function gotPoses(poses) {
                 if (poses.length > 0) {
-                    noseX = poses[0].pose.keypoints[0].position.x;
-                    noseY = poses[0].pose.keypoints[0].position.y;
+                    // noseX = poses[0].pose.keypoints[0].position.x;
+                    // noseY = poses[0].pose.keypoints[0].position.y;
 
                     // threeDSpot = give3DCoord(noseX, noseY);
                     // console.log(threeDSpot);
@@ -134,15 +145,20 @@
                     // earrX = poses[0].pose.keypoints[4].position.x;
                     // earrY = poses[0].pose.keypoints[4].position.y;
 
-                    // shoulderlX = poses[0].pose.keypoints[5].position.x;
-                    // shoulderlY = poses[0].pose.keypoints[5].position.y;
-                    // elbowlX = poses[0].pose.keypoints[7].position.x;
-                    // elbowlY = poses[0].pose.keypoints[7].position.y;
+                    shoulderlX = poses[0].pose.keypoints[5].position.x;
+                    shoulderlY = poses[0].pose.keypoints[5].position.y;
+                    shoulderrX = poses[0].pose.keypoints[6].position.x;
+                    shoulderrY = poses[0].pose.keypoints[6].position.y;
+
+                    elbowlX = poses[0].pose.keypoints[7].position.x;
+                    elbowlY = poses[0].pose.keypoints[7].position.y;
+                    elbowrX = poses[0].pose.keypoints[8].position.x;
+                    elbowrY = poses[0].pose.keypoints[8].position.y;
+
                     wristlX = poses[0].pose.keypoints[9].position.x;
                     wristlY = poses[0].pose.keypoints[9].position.y;
                     wristrX = poses[0].pose.keypoints[10].position.x;
                     wristrY = poses[0].pose.keypoints[10].position.y;
-                    // console.log(wristrX, wristrY)
                     }
             }
 
@@ -187,14 +203,26 @@
 
             // RIGHT, LEFT WRIST & NOSE FOLLOWER
             var geometry = new THREE.CircleGeometry(0.01, 32);
-            var materialWrist = new THREE.MeshBasicMaterial( {color: 0xf451b2} );
             var materialNose = new THREE.MeshBasicMaterial( {color: 0xfff68f} )
+            var materialShoulder = new THREE.MeshBasicMaterial( {color: 0x8FA0FF} )
+            var materialElbow = new THREE.MeshBasicMaterial( {color: 0xB68FFF} )
+            var materialWrist = new THREE.MeshBasicMaterial( {color: 0xf451b2} );
+
+
             var rightWristFollow = new THREE.Mesh(geometry, materialWrist);
             var leftWristFollow = new THREE.Mesh(geometry, materialWrist);
+            var leftShoulderFollow = new THREE.Mesh(geometry, materialShoulder);
+            var rightShoulderFollow = new THREE.Mesh(geometry, materialShoulder);
+            var leftElbowFollow = new THREE.Mesh(geometry, materialElbow);
+            var rightElbowFollow = new THREE.Mesh(geometry, materialElbow);
             var noseFollow = new THREE.Mesh(geometry, materialNose);
+            scene.add(leftShoulderFollow);
+            scene.add(rightShoulderFollow);
+            scene.add(leftElbowFollow);
+            scene.add(rightElbowFollow);
             scene.add(rightWristFollow);
             scene.add(leftWristFollow);
-            scene.add(noseFollow);
+            // scene.add(noseFollow);
 
             // FBX LOADER & VARS
             var holder = []
@@ -215,16 +243,26 @@
 
                 var textLoader = new THREE.CubeTextureLoader();
                 // var reflection = THREE.ImageUtils.loadTextureCube(['/static/textures/diamond.jpg','/static/textures/diamond.jpg','/static/textures/diamond.jpg','/static/textures/diamond.jpg','/static/textures/diamond.jpg','/static/textures/diamond.jpg'])
-                textLoader.setPath('/static/textures/');
+                textLoader.setPath('/static/textures/bubbles/cube2/');
+                // var textureCube = textLoader.load([
+                //     'diamond.jpg','diamond.jpg',
+                //     'diamond.jpg','diamond.jpg',
+                //     'diamond.jpg','diamond.jpg'
+                // ]);
+
                 var textureCube = textLoader.load([
-                    'diamond.jpg','diamond.jpg',
-                    'diamond.jpg','diamond.jpg',
-                    'diamond.jpg','diamond.jpg'
+                    'posx.jpg','negx.jpg',
+                    'posy.jpg','negy.jpg',
+                    'posz.jpg','negz.jpg'
                 ]);
 
                 example.traverse(function(child) {
                     if (child.name == "root") {
                         child.material.envMap = textureCube;
+                        child.material.emissive = new THREE.Color('purple');
+                        child.material.emissiveIntensity = 1.7;
+                        child.material.shininess = 100;
+                        console.log(child.material.envMap.intensity)
                         console.log(child.material)
                     }
                 })
@@ -244,18 +282,20 @@
                 console.log(e)
             })
 
-            // AMBIENT LIGHT
+            // AMBIENT LIGH
             var ambientLight = new THREE.AmbientLight(0x404040);
             scene.add(ambientLight);
 
             // DIRECTIONAL LIGHTS
-            var directionalLightUnder = new THREE.DirectionalLight(0xffffff, 5);
+            var directionalLightUnder = new THREE.DirectionalLight(0xffffff, 7);
             directionalLightUnder.position.y = -100
             directionalLightUnder.position.z = -1
             console.log(directionalLightUnder.position)
+            // var helper2 = new THREE.DirectionalLightHelper(directionalLightUnder, 5);
+            // scene.add(helper2);
             scene.add(directionalLightUnder);
 
-            var directionalLightFront = new THREE.DirectionalLight(0xffffff, 10);
+            var directionalLightFront = new THREE.DirectionalLight(0xffffff, 12);
             directionalLightFront.position.y = 3
             directionalLightFront.position.z = 5
             console.log(directionalLightFront.position)
@@ -281,10 +321,23 @@
                 return mouse
             }
 
+            // GET MAGNITUDE OF TWO VECTORS
+            function getMagnitude(x1, y1, x2, y2) {
+                return (Math.sqrt(((x1-x2)**2) + ((y1-y2)**2)))
+            }
+
+            // GET WRIST ROTATION
+            // Mse = scalar mag from shoulder to elbow
+            // Mew = " from elbow to wrist
+            // Msw = " from shoulder to wrist
+            function getWristRotation(Mse, Mew, Msw) {
+                return Math.acos(((Mse**2)+(Mew**2)-(Msw**2))/(2*Mse*Mew))
+            }
+
             // GET ROTATION OF ARM
-            function getRotation(nosePos, armPos) {
+            function getArmRotation(shoulderPos, elbowPos) {
                 // console.log(nosePos)
-                return Math.atan((armPos.x - nosePos.x)/(nosePos.y - armPos.y))
+                return Math.atan((elbowPos.y - shoulderPos.y)/(elbowPos.x - shoulderPos.x))
             }
 
             // DRAW IT ALL
@@ -306,33 +359,90 @@
 
                
                 // NOSE & HAND FOLLOWERS
-                threeDSpotR = give3DCoord(wristrX, wristrY);
-                threeDSpotL = give3DCoord(wristlX, wristlY);
-                threeDSpotC = give3DCoord(noseX, noseY);
+                // threeDSpotC = give3DCoord(noseX, noseY);
 
-                rightWristFollow.position.x = -threeDSpotR.x
-                rightWristFollow.position.y = threeDSpotR.y
-                rightWristFollow.position.z = threeDSpotR.z
+                // 2D TO 3D COORDS
+                shoulderL3DSpot = give3DCoord(shoulderlX, shoulderlY);
+                shoulderR3DSpot = give3DCoord(shoulderrX, shoulderrY);
+                elbowL3DSpot = give3DCoord(elbowlX, elbowlY);
+                elbowR3DSpot = give3DCoord(elbowrX, elbowrY);
+                wristR3DSpot = give3DCoord(wristrX, wristrY);
+                wristL3DSpot = give3DCoord(wristlX, wristlY);
 
-                leftWristFollow.position.x = -threeDSpotL.x
-                leftWristFollow.position.y = threeDSpotL.y
-                leftWristFollow.position.z = threeDSpotL.z
+                // UPDATE POSITION OF FOLLOWERS
+                leftShoulderFollow.position.x = -shoulderL3DSpot.x;
+                leftShoulderFollow.position.y = shoulderL3DSpot.y;
+                leftShoulderFollow.position.z = shoulderL3DSpot.z;
 
-                noseFollow.position.x = -threeDSpotC.x
-                noseFollow.position.y = threeDSpotC.y
-                noseFollow.position.z = threeDSpotC.z
+                rightShoulderFollow.position.x = -shoulderR3DSpot.x;
+                rightShoulderFollow.position.y = shoulderR3DSpot.y;
+                rightShoulderFollow.position.z = shoulderR3DSpot.z;
+
+                leftElbowFollow.position.x = -elbowL3DSpot.x;
+                leftElbowFollow.position.y = elbowL3DSpot.y;
+                leftElbowFollow.position.z = elbowL3DSpot.z;
+
+                rightElbowFollow.position.x = -elbowR3DSpot.x;
+                rightElbowFollow.position.y = elbowR3DSpot.y;
+                rightElbowFollow.position.z = elbowR3DSpot.z;
+
+                rightWristFollow.position.x = -wristR3DSpot.x
+                rightWristFollow.position.y = wristR3DSpot.y
+                rightWristFollow.position.z = wristR3DSpot.z
+
+                leftWristFollow.position.x = -wristL3DSpot.x
+                leftWristFollow.position.y = wristL3DSpot.y
+                leftWristFollow.position.z = wristL3DSpot.z
+
+                // noseFollow.position.x = -threeDSpotC.x
+                // noseFollow.position.y = threeDSpotC.y
+                // noseFollow.position.z = threeDSpotC.z
+
                 // GET ROTATION & SET
-                if (threeDSpotC && threeDSpotR) {
-                    let rightRot = Math.abs(getRotation(threeDSpotC, threeDSpotR)) - 1.5;
-                    let leftRot = Math.abs(getRotation(threeDSpotC, threeDSpotL)) - 1.5;
-                    // console.log(rightRot)
+                // Left Arm 
+                //      0 -> t pose straight out
+                //      -Math.PI/2 (-1.57) -> straight up
+                //      Math.PI/2 (1.57) -> straight down
+                // Right Arm
+                //      0 -> t pose straigt
+                //      -Math.PI/2 -> straight down
+                //      Math.PI/2 -> straight up
+
+                // right rotations
+                // down = 1.5
+                // straight out = 0
+                // straigt up = -1
+
+                // left 
+                // down = 1.5
+                if (shoulderR3DSpot && elbowR3DSpot) {
+                    let armRRot = getArmRotation(shoulderR3DSpot, elbowR3DSpot);
+                    let armLRot = getArmRotation(shoulderL3DSpot, elbowL3DSpot);
+
+                    let armRRotMapped = armRRot.map(1.5, -1, -Math.PI/2, Math.PI/2);
+                    let armLRotMapped = armLRot.map(-1.5, 1, Math.PI/2, -Math.PI/2)
+
                     if (collarR && collarL) {
-                        collarR.children[0].rotation.z = rightRot
-                        collarL.children[0].rotation.z = -leftRot
+                        collarR.children[0].rotation.z = armRRotMapped;
+                        collarL.children[0].rotation.z = armLRotMapped;
                     }
                 }
 
-                threeDSpotR = give3DCoord(eyerX, eyerY);
+                if (wristR3DSpot && wristL3DSpot) {
+                    let MseR = getMagnitude(shoulderrX, shoulderrY, elbowrX, elbowrY);
+                    let MewR = getMagnitude(elbowrX, elbowrY, wristrX, wristrY);
+                    let MswR = getMagnitude(shoulderrX, shoulderrY, wristrX, wristrY);
+
+                    let wristRRot = getWristRotation(MseR, MewR, MswR);
+                    
+                    // debugText.innerHTML = "wrist Right: " + wristRRot;
+
+                    // function getWristRotation(Mse, Mew, Msw) {
+                    //     return Math.acos(((Mse**2)+(Mew**2)-(Msw**2))/(2*Mse*Mew))
+                    // }
+                }
+
+                // wristR3DSpot = give3DCoord(eyerX, eyerY);
 
                 renderer.render(scene, camera);
                 capturer.capture(renderer.domElement);

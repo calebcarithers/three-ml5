@@ -6,33 +6,33 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.get('/noseDraw', (req, res) => {
-    res.sendFile(path.join(__dirname, './noseDraw.html'));
+    res.sendFile(path.join(__dirname, './play/noseDraw.html'));
 })
 app.get('/p5ML5', (req, res) => {
-    res.sendFile(path.join(__dirname, './p5ML5.html'));
+    res.sendFile(path.join(__dirname, './play/p5ML5.html'));
 })
 app.get('/eyeFollower', (req, res) => {
-    res.sendFile(path.join(__dirname, './eyeFollower.html'));
+    res.sendFile(path.join(__dirname, './play/eyeFollower.html'));
 })
 app.get('/highFive', (req, res) => {
-    res.sendFile(path.join(__dirname, './highFive.html'));
+    res.sendFile(path.join(__dirname, './play/highFive.html'));
 })
 app.get('/8thwall', (req, res) => {
-    res.sendFile(path.join(__dirname, './8thwall-ml5.html'));
+    res.sendFile(path.join(__dirname, './play/8thwall-ml5.html'));
 })
 app.get('/controlRig', (req, res) => {
     res.sendFile(path.join(__dirname, './controlRig.html'));
 })
 app.get('/p5', (req, res) => {
-    res.sendFile(path.join(__dirname, './p5fun.html'));
+    res.sendFile(path.join(__dirname, './play/p5fun.html'));
 })
 
 app.get('/test', (req, res) => {
-    res.sendFile(path.join(__dirname, './test.html'));
+    res.sendFile(path.join(__dirname, './play/test.html'));
 })
 
 app.get('/newtest', (req, res) => {
-    res.sendFile(path.join(__dirname, './newtest.html'));
+    res.sendFile(path.join(__dirname, './play/newtest.html'));
 })
 
 
