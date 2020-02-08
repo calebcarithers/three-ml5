@@ -1,0 +1,1 @@
+Creating an online lobby/interaction space for users to control meshes with their webcam (see **controlRig.html**). ~A virtual dance party controled by your physical dancing body~. This has also ended up being a place to dump other exploration of three.js & ml5js (see **/play**).
